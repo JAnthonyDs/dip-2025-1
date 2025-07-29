@@ -7,7 +7,18 @@ def create_salt_and_pepper_noise(height=100, width=100, salt_prob=0.05, pepper_p
     equal to salt_prob and pepper_prob. Pixels without noise have values of 0.5.
     """
     ### START CODE HERE ###
-    # TODO
+
+    #Initializing a base image with value 0.5
+    img = np.ones((height, width)) * 0.5 
+    
+    salt_mask = np.random.random((height, width)) < salt_prob # Matriz de ruído salt
+    img[salt_mask] = 1.0 # Aplica salt na imagem
+    
+    remaining_pixels = ~salt_mask # Aqui temos apenas os píxels onde não foi aplicado o Salt
+    pepper_prob_adjusted = pepper_prob / (1 - salt_prob) # Ajuste de probabilidade 
+    pepper_mask = (np.random.random((height, width)) < pepper_prob_adjusted) & remaining_pixels # Aplicação do Ruído pepper
+    img[pepper_mask] = -1.0
+
     ### END CODE HERE ###
     return img
 
