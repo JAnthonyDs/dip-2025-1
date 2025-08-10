@@ -26,8 +26,21 @@ def compute_histogram_intersection(img1: np.ndarray, img2: np.ndarray) -> float:
         raise ValueError("Both input images must be 2D grayscale arrays.")
 
     ### START CODE HERE ###
-    # Step 1: initialize base image with 0.5
-    intersection = 0.0
+    # Histograms (256 bins) normalizados no intervalo [0, 256)
+    counts1, _ = np.histogram(img1, bins=256, range=(0, 256))
+    counts2, _ = np.histogram(img2, bins=256, range=(0, 256))
+
+    h1 = counts1.astype(np.float64)
+    h2 = counts2.astype(np.float64)
+
+    s1 = h1.sum()
+    s2 = h2.sum()
+    if s1 > 0:
+        h1 /= s1
+    if s2 > 0:
+        h2 /= s2
+
+    intersection = float(np.minimum(h1, h2).sum())
     ### END CODE HERE ###
 
 
