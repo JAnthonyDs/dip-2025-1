@@ -114,7 +114,7 @@ def _mse(i1: np.ndarray, i2: np.ndarray) -> float:
     """
     ### START CODE HERE ###
     ### TODO
-    mse = None
+    mse = np.mean(np.square(i1 - i2))
     ### END CODE HERE ###
 
     return mse
@@ -141,7 +141,16 @@ def _psnr(i1: np.ndarray, i2: np.ndarray, data_range: float = 1.0) -> float:
     """
     ### START CODE HERE ###
     ### TODO
-    psnr = None
+
+    # Primeiro, calcula o MSE
+    mse_val = _mse(i1, i2)
+
+    # Se o MSE for 0, as imagens são idênticas e o PSNR é infinito.
+    if mse_val == 0:
+        return np.inf
+
+    # Aplica a fórmula do PSNR.
+    psnr = 10 * np.log10((data_range**2) / mse_val)
     ### END CODE HERE ###
 
     return psnr
@@ -171,7 +180,23 @@ def _ssim(i1: np.ndarray, i2: np.ndarray, *, C1: float = 1e-8, C2: float = 1e-8)
     """
     ### START CODE HERE ###
     ### TODO
-    ssim = None
+
+    mu1 = np.mean(i1)
+    mu2 = np.mean(i2)
+
+    var1 = np.var(i1)
+    var2 = np.var(i2)
+
+    # Calcula a covariância entre as duas imagens.
+    # É preciso achatar os arrays para 1D para a função np.cov.
+    # O valor que queremos está na posição [0, 1] da matriz de covariância.
+    cov12 = np.cov(i1.ravel(), i2.ravel())[0, 1]
+
+    # Monta o numerador e o denominador da fórmula SSIM.
+    numerator = (2 * mu1 * mu2 + C1) * (2 * cov12 + C2)
+    denominator = (mu1**2 + mu2**2 + C1) * (var1 + var2 + C2)
+
+    ssim = numerator / denominator
     ### END CODE HERE ###
 
     return ssim
@@ -199,12 +224,29 @@ def _npcc(i1: np.ndarray, i2: np.ndarray) -> float:
     """
 
     ### START CODE HERE ###
-    ### TODO
-    npcc = None
+    mu1 = np.mean(i1)
+    mu2 = np.mean(i2)
+    i1_centered = i1 - mu1
+    i2_centered = i2 - mu2
+
+    # O numerador é a soma do produto das imagens centralizadas.
+    numerator = np.sum(i1_centered * i2_centered)
+
+    # O denominador é a raiz quadrada do produto da soma dos quadrados de cada imagem centralizada.
+    sum_sq_i1 = np.sum(np.square(i1_centered))
+    sum_sq_i2 = np.sum(np.square(i2_centered))
+    denominator = np.sqrt(sum_sq_i1 * sum_sq_i2)
+
+    # Caso especial: se o denominador for 0, a correlação é indefinida.
+    # Isso acontece se uma das imagens for constante (variância zero).
+    if denominator == 0:
+        # Se forem constantes idênticas, a correlação é 1. Senão, é 0.
+        npcc = 1.0 if np.array_equal(i1, i2) else 0.0
+    else:
+        npcc = numerator / denominator
     ### END CODE HERE ###
 
     return npcc
-
 
 # -------------------------- Self-check (optional) ----------------------- #
 
