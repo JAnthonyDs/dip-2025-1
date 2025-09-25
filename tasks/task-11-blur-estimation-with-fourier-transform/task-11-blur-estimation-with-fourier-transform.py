@@ -44,6 +44,24 @@ def frequency_blur_score(
         (This will align with the grader's expectation.)
     """
     # ====== YOUR CODE STARTS HERE ======
-    score = 0.0
+    if len(image.shape) == 3:
+        gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    else:
+        gray_image = image
+
+    fft = cv2.dft(np.float32(gray_image), flags=cv2.DFT_COMPLEX_OUTPUT)
+    
+    fft_shift = np.fft.fftshift(fft)
+
+    rows, cols = gray_image.shape
+    crow, ccol = rows // 2 , cols // 2
+    half_size = center_size // 2
+    
+    fft_shift[crow - half_size : crow + half_size, ccol - half_size : ccol + half_size] = 0
+
+    magnitude_spectrum = cv2.magnitude(fft_shift[:,:,0], fft_shift[:,:,1])
+
+    score = np.mean(magnitude_spectrum)
+    
     # ====== YOUR CODE ENDS HERE ======
     return score
